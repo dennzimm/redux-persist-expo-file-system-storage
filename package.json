@@ -1,0 +1,48 @@
+{
+  "name": "redux-persist-expo-filesystem-storage",
+  "version": "0.0.1",
+  "description": "A highly extensible and configurable storage engine for Redux Persist using Expo FileSystem for persistence in React Native applications.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "release": "pnpm run build && changeset publish",
+    "lint": "tsc"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "expo-file-system": "^16.0.6",
+    "tsup": "^8.0.2",
+    "type-fest": "^4.10.3",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "expo-file-system": "^16.0.6"
+  },
+  "files": [
+    "dist/*.js",
+    "dist/*.cjs",
+    "dist/*.mjs",
+    "dist/*.d.ts",
+    "dist/*.d.mts"
+  ],
+  "author": "Dennis Zimmermann <https://github.com/dennzimm>",
+  "homepage": "https://github.com/dennzimm/redux-persist-expo-filesystem-storage#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dennzimm/redux-persist-expo-filesystem-storage.git"
+  },
+  "bugs": "https://github.com/dennzimm/redux-persist-expo-filesystem-storage/issues",
+  "keywords": [
+    "redux",
+    "redux-persist",
+    "expo",
+    "expo-file-system",
+    "react-native",
+    "react",
+    "storage",
+    "persistence"
+  ]
+}

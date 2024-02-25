@@ -1,5 +1,11 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.0.3
+
+### Patch Changes
+
+- Rename package to redux-persist-expo-file-system-storage
+
 ## 1.0.2
 
 ### Patch Changes

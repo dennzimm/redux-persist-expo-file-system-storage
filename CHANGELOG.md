@@ -1,5 +1,11 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.0.1
+
+### Patch Changes
+
+- Better debug logs with deep parsed content/values available in logs
+
 ## 1.0.0
 
 ### Major Changes

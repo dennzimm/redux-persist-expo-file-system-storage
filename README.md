@@ -1,10 +1,10 @@
-# redux-persist-expo-filesystem-storage
+# redux-persist-expo-file-system-storage
 
 A highly extensible and configurable storage engine for [Redux Persist](https://github.com/rt2zz/redux-persist) using [Expo FileSystem](https://docs.expo.dev/versions/latest/sdk/filesystem/) for persistence in React Native applications. 
 
 ## Table of Contents
 
-- [Why Choose redux-persist-expo-filesystem-storage?](#why-choose-redux-persist-expo-filesystem-storage)
+- [Why Choose redux-persist-expo-file-system-storage?](#why-choose-redux-persist-expo-file-system-storage)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -13,7 +13,7 @@ A highly extensible and configurable storage engine for [Redux Persist](https://
 - [Contributing](#contributing)
 - [License](#license)
 
-## Why Choose redux-persist-expo-filesystem-storage?
+## Why Choose redux-persist-expo-file-system-storage?
 
 This package serves as an alternative to the default AsyncStorage, specifically addressing storage size limitations in Android environments. It offers a versatile and efficient solution for managing and persisting state in your React Native applications.
 
@@ -31,24 +31,24 @@ This package serves as an alternative to the default AsyncStorage, specifically 
 
 ## Installation
 
-Choose your preferred package manager and add `redux-persist-expo-filesystem-storage` to your React Native project:
+Choose your preferred package manager and add `redux-persist-expo-file-system-storage` to your React Native project:
 
 ```bash
-npm install redux-persist-expo-filesystem-storage
-yarn add redux-persist-expo-filesystem-storage
-pnpm add redux-persist-expo-filesystem-storage
-bun add redux-persist-expo-filesystem-storage
+npm install redux-persist-expo-file-system-storage
+yarn add redux-persist-expo-file-system-storage
+pnpm add redux-persist-expo-file-system-storage
+bun add redux-persist-expo-file-system-storage
 ```
 
 After installation, you're ready to integrate the storage engine into your Redux setup for seamless state persistence.
 
 ## Usage
 
-Here's a simple example demonstrating how to integrate `redux-persist-expo-filesystem-storage` into your application:
+Here's a simple example demonstrating how to integrate `redux-persist-expo-file-system-storage` into your application:
 
 ```typescript
 import * as FileSystem from "expo-file-system";
-import { createExpoFileSystemStorage, type StorageOptions } from 'redux-persist-expo-filesystem-storage';
+import { createExpoFileSystemStorage, type StorageOptions } from 'redux-persist-expo-file-system-storage';
 import type { PersistConfig } from "redux-persist";
 import { rootReducer, type RootState } from './store.config';
 
@@ -102,7 +102,7 @@ The storage engine provides various options for customization. Fine-tune your st
 This example demonstrates the direct usage of `getItem` and `setItem` methods from `ExpoFileSystemStorage`. For more details and available methods, please refer to the `ExpoFileSystemStorage` class.
 
 ```typescript
-import { createExpoFileSystemStorage } from 'redux-persist-expo-filesystem-storage';
+import { createExpoFileSystemStorage } from 'redux-persist-expo-file-system-storage';
 
 // Create an instance of ExpoFileSystemStorage
 const expoFileSystemStorage = createExpoFileSystemStorage();
@@ -136,7 +136,7 @@ exampleSetItem();
 
 ## Contributing
 
-Contributions are welcome! If you encounter issues or have suggestions, please feel free to open an [issue](https://github.com/dennzimm/redux-persist-expo-filesystem-storage/issues) or submit a [pull request](https://github.com/dennzimm/redux-persist-expo-filesystem-storage/pulls).
+Contributions are welcome! If you encounter issues or have suggestions, please feel free to open an [issue](https://github.com/dennzimm/redux-persist-expo-file-system-storage/issues) or submit a [pull request](https://github.com/dennzimm/redux-persist-expo-file-system-storage/pulls).
 
 This package uses [Changesets](https://github.com/changesets/changesets/tree/main) for version management. For further information on contributing and working with Changesets, refer to the Changesets Documentation: [Using Changesets](https://github.com/changesets/changesets/blob/main/docs/intro-to-using-changesets.md).
 

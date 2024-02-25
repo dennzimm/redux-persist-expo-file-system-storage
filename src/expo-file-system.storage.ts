@@ -1,13 +1,19 @@
 import * as FileSystem from "expo-file-system";
 import type { RequiredDeep, SetOptional } from "type-fest";
+import type { StorageEngine } from "./types/storage-engine.types";
 import type { Logger } from "./types/storage-logger.types";
 import type { StorageOptions } from "./types/storage-options.types";
-import type { StorageEngine } from "./types/storage-engine.types";
+import { deepParseJson } from "./utils/deep-parse-json.util";
 
 /**
  * Represents a storage engine that uses Expo FileSystem for persistence.
  */
 class ExpoFileSystemStorage implements StorageEngine {
+  /**
+   * The name of the ExpoFileSystemStorage class.
+   */
+  public static name = "ExpoFileSystemStorage";
+  
   /**
    * The options for the ExpoFileSystemStorage class.
    */
@@ -77,8 +83,6 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<string> {
     await this.ready;
 
-    this.logDebugMessageInDebugMode(`(${this.getItem.name}): Get item for key '${key}'`);
-
     const { encoding } = this.options;
 
     try {
@@ -86,13 +90,22 @@ class ExpoFileSystemStorage implements StorageEngine {
         encoding,
       });
 
+      this.logDebugMessageInDebugMode(
+        `(${this.getItem.name}): Get item for key '${key}'`,
+        deepParseJson(content)
+      );
+
       if (onSuccess) {
         await onSuccess(content);
       }
 
       return content;
     } catch (error) {
-      return this.handleStorageError(`(${this.getItem.name}): Error getting item for key '${key}'`, error, onFail);
+      return this.handleStorageError(
+        `(${this.getItem.name}): Error getting item for key '${key}'`,
+        error,
+        onFail
+      );
     }
   }
 
@@ -109,8 +122,6 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<string[]> {
     await this.ready;
 
-    this.logDebugMessageInDebugMode(`(${this.getAllKeys.name}): Getting all keys`);
-
     try {
       const fileNames = await FileSystem.readDirectoryAsync(
         this.options.storagePath
@@ -120,13 +131,22 @@ class ExpoFileSystemStorage implements StorageEngine {
         decodeURIComponent(fileName)
       );
 
+      this.logDebugMessageInDebugMode(
+        `(${this.getAllKeys.name}): Getting all keys`,
+        encodedFileNames
+      );
+
       if (onSuccess) {
         await onSuccess(encodedFileNames);
       }
 
       return encodedFileNames;
     } catch (error) {
-      return this.handleStorageError(`(${this.getAllKeys.name}): Error getting all keys`, error, onFail);
+      return this.handleStorageError(
+        `(${this.getAllKeys.name}): Error getting all keys`,
+        error,
+        onFail
+      );
     }
   }
 
@@ -147,8 +167,6 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<void> {
     await this.ready;
 
-    this.logDebugMessageInDebugMode(`(${this.setItem.name}): Set item for key '${key}'`);
-
     const { encoding } = this.options;
 
     try {
@@ -156,13 +174,22 @@ class ExpoFileSystemStorage implements StorageEngine {
         encoding,
       });
 
+      this.logDebugMessageInDebugMode(
+        `(${this.setItem.name}): Set item for key '${key}'`,
+        deepParseJson(value)
+      );
+
       if (onSuccess) {
         await onSuccess();
       }
 
       return Promise.resolve();
     } catch (error) {
-      return this.handleStorageError(`(${this.setItem.name}): Error setting item for key '${key}'`, error, onFail);
+      return this.handleStorageError(
+        `(${this.setItem.name}): Error setting item for key '${key}'`,
+        error,
+        onFail
+      );
     }
   }
 
@@ -181,10 +208,12 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<void> {
     await this.ready;
 
-    this.logDebugMessageInDebugMode(`(${this.removeItem.name}): Remove item for key '${key}'`);
-
     try {
       await FileSystem.deleteAsync(this.pathForKey(key), { idempotent: true });
+
+      this.logDebugMessageInDebugMode(
+        `(${this.removeItem.name}): Remove item for key '${key}'`
+      );
 
       if (onSuccess) {
         await onSuccess();
@@ -192,7 +221,11 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       return Promise.resolve();
     } catch (error) {
-      return this.handleStorageError(`(${this.removeItem.name}): Error removing item for key '${key}'`, error, onFail);
+      return this.handleStorageError(
+        `(${this.removeItem.name}): Error removing item for key '${key}'`,
+        error,
+        onFail
+      );
     }
   }
 
@@ -209,7 +242,9 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<void> {
     await this.ready;
 
-    this.logDebugMessageInDebugMode(`(${this.clear.name}): Clearing storage...`);
+    this.logDebugMessageInDebugMode(
+      `(${this.clear.name}): Clearing storage...`
+    );
 
     try {
       await FileSystem.deleteAsync(this.options.storagePath, {
@@ -220,7 +255,9 @@ class ExpoFileSystemStorage implements StorageEngine {
         intermediates: true,
       });
 
-      this.logDebugMessageInDebugMode(`(${this.clear.name}): Storage cleared successfully!`);
+      this.logDebugMessageInDebugMode(
+        `(${this.clear.name}): Storage cleared successfully!`
+      );
 
       if (onSuccess) {
         await onSuccess();
@@ -228,7 +265,11 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       return Promise.resolve();
     } catch (error) {
-      return this.handleStorageError(`(${this.clear.name}): Error clearing storage`, error, onFail);
+      return this.handleStorageError(
+        `(${this.clear.name}): Error clearing storage`,
+        error,
+        onFail
+      );
     }
   }
 
@@ -238,13 +279,19 @@ class ExpoFileSystemStorage implements StorageEngine {
    * @returns A promise that resolves to a boolean indicating whether there are stored items or not.
    */
   public hasStoredItems(): Promise<boolean> {
-    this.logDebugMessageInDebugMode(`(${this.hasStoredItems.name}): Checking if there are stored items...`);
+    this.logDebugMessageInDebugMode(
+      `(${this.hasStoredItems.name}): Checking if there are stored items...`
+    );
 
-    const hasStoredItems = FileSystem.readDirectoryAsync(this.options.storagePath)
-    .then((fileNames) => fileNames.length > 0)
-    .catch(() => false);
+    const hasStoredItems = FileSystem.readDirectoryAsync(
+      this.options.storagePath
+    )
+      .then((fileNames) => fileNames.length > 0)
+      .catch(() => false);
 
-    this.logDebugMessageInDebugMode(`(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`);
+    this.logDebugMessageInDebugMode(
+      `(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`
+    );
 
     return hasStoredItems;
   }
@@ -271,7 +318,9 @@ class ExpoFileSystemStorage implements StorageEngine {
         });
       }
 
-      this.logDebugMessageInDebugMode(`(${this.initialize.name}): Using existing directory for storage with path: '${this.options.storagePath}'`);
+      this.logDebugMessageInDebugMode(
+        `(${this.initialize.name}): Using existing directory for storage with path: '${this.options.storagePath}'`
+      );
 
       if (this.options.afterInit) {
         await this.options.afterInit();
@@ -279,7 +328,10 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       return Promise.resolve();
     } catch (error) {
-      return this.handleStorageError(`(${this.initialize.name}): Error initializing storage`, error);
+      return this.handleStorageError(
+        `(${this.initialize.name}): Error initializing storage`,
+        error
+      );
     }
   }
 

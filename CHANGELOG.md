@@ -1,5 +1,11 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.0.2
+
+### Patch Changes
+
+- Set access to public in changeset config
+
 ## 1.0.1
 
 ### Patch Changes

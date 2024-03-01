@@ -23,6 +23,11 @@ class ExpoFileSystemStorage implements StorageEngine {
   >;
 
   /**
+   * Set to keep track of already read keys during the current session.
+   */
+  private readonly readKeys: Set<string> = new Set();
+
+  /**
    * Indicates whether the storage has been initialized.
    */
   private isInitialized: boolean = false;
@@ -88,6 +93,10 @@ class ExpoFileSystemStorage implements StorageEngine {
   ): Promise<string> {
     await this.waitForInitialization();
 
+    const isKeyReadForTheFirstTime = !this.readKeys.has(key);
+
+    this.readKeys.add(key);
+
     const { encoding } = this.options;
 
     try {
@@ -106,11 +115,21 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       return content;
     } catch (error) {
-      return this.handleStorageError(
-        `(${this.getItem.name}): Error getting item for key '${key}'`,
-        error,
-        onFail
-      );
+      const isItemExistent = await this.itemExists(key);
+
+      if (isKeyReadForTheFirstTime && !isItemExistent) {
+        this.logDebugMessageInDebugMode(
+          `(${this.getItem.name}): Item for key '${key}' was read for the first time, but it doesn't exist in the storage. Maybe it was not set yet.`
+        );
+
+        return "";
+      }
+
+      const errorMessage = isKeyReadForTheFirstTime
+        ? `(${this.getItem.name}): Error getting item for key '${key}'. The item was read for the first time and exists in the storage, but an error occurred while reading it.`
+        : `(${this.getItem.name}): Error getting item for key '${key}'`;
+
+      return this.handleStorageError(errorMessage, error, onFail);
     }
   }
 
@@ -250,6 +269,8 @@ class ExpoFileSystemStorage implements StorageEngine {
     this.logDebugMessageInDebugMode(
       `(${this.clear.name}): Clearing storage...`
     );
+
+    this.readKeys.clear();
 
     try {
       await FileSystem.deleteAsync(this.options.storagePath, {

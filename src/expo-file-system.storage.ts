@@ -279,6 +279,24 @@ class ExpoFileSystemStorage implements StorageEngine {
   }
 
   /**
+   * Checks if an item with the specified key exists in the storage.
+   *
+   * @param key - The key of the item to check.
+   * @returns A promise that resolves to a boolean indicating whether the item exists or not.
+   */
+  public async itemExists(key: string): Promise<boolean> {
+    await this.waitForInitialization();
+
+    try {
+      const { exists } = await FileSystem.getInfoAsync(this.pathForKey(key));
+
+      return exists;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Checks if there are any stored items in the storage directory.
    *
    * @returns A promise that resolves to a boolean indicating whether there are stored items or not.

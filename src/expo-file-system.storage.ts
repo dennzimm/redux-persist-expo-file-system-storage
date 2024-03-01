@@ -416,7 +416,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     ...optionalParams: unknown[]
   ): void {
     if (this.isDebugModeEnabled) {
-      this.logDebugMessage(message, ...optionalParams);
+      this.logDebugMessage("[DEBUG]", message, ...optionalParams);
     }
   }
 

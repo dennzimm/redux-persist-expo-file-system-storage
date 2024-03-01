@@ -490,8 +490,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    */
   private logDebugMessage(message: string, ...optionalParams: unknown[]): void {
     this.logger.debug(
-      `${ExpoFileSystemStorage.name}:`,
-      message,
+      `\u001b[36m${ExpoFileSystemStorage.name}: ${message}\u001b[0m`,
       ...optionalParams
     );
   }
@@ -507,7 +506,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     ...optionalParams: unknown[]
   ): void {
     if (this.isDebugModeEnabled) {
-      this.logDebugMessage("[DEBUG]", message, ...optionalParams);
+      this.logDebugMessage(`[DEBUG] ${message}`, ...optionalParams);
     }
   }
 
@@ -519,8 +518,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    */
   private logErrorMessage(message: string, ...optionalParams: unknown[]): void {
     this.logger.error(
-      `${ExpoFileSystemStorage.name}:`,
-      message,
+      `\u001b[31m${ExpoFileSystemStorage.name}: ${message}\u001b[0m`,
       ...optionalParams
     );
   }

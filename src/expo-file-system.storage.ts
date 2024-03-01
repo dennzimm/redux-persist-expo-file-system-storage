@@ -309,6 +309,58 @@ class ExpoFileSystemStorage implements StorageEngine {
   }
 
   /**
+   * Logs all the stored items.
+   *
+   * @returns A promise that resolves when the logging is complete.
+   */
+  public async logStoredItems(): Promise<void> {
+    await this.waitForInitialization();
+
+    this.logDebugMessageInDebugMode(
+      `(${this.logStoredItems.name}): Logging stored items...`
+    );
+
+    if (!(await this.hasStoredItems())) {
+      this.logDebugMessage(
+        `(${this.logStoredItems.name}): No stored items found`
+      );
+
+      return;
+    }
+
+    const keys = await this.getAllKeys();
+
+    await Promise.all(
+      keys.map(async (key) => {
+        const { encoding } = this.options;
+
+        try {
+          const content = await FileSystem.readAsStringAsync(
+            this.pathForKey(key),
+            {
+              encoding,
+            }
+          );
+
+          this.logDebugMessage(
+            `(${this.logStoredItems.name}): Key: '${key}', Content:`,
+            deepParseJson(content)
+          );
+        } catch (error) {
+          return this.handleStorageError(
+            `(${this.logStoredItems.name}): Error logging stored items`,
+            error
+          );
+        }
+      })
+    );
+
+    this.logDebugMessageInDebugMode(
+      `(${this.logStoredItems.name}): Stored items logged successfully!`
+    );
+  }
+
+  /**
    * Initializes the storage by creating a new directory if it doesn't exist or using an existing directory.
    *
    * @returns A promise that resolves when the initialization is complete.
@@ -316,8 +368,8 @@ class ExpoFileSystemStorage implements StorageEngine {
   private async initialize(): Promise<void> {
     this.logDebugMessageInDebugMode(
       `(${this.initialize.name}): Initializing storage...`
-    )
-    
+    );
+
     if (this.options.beforeInit) {
       await this.options.beforeInit();
     }
@@ -347,7 +399,7 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       this.logDebugMessageInDebugMode(
         `(${this.initialize.name}): Storage initialized successfully!`
-      )
+      );
     } catch (error) {
       return this.handleStorageError(
         `(${this.initialize.name}): Error initializing storage`,

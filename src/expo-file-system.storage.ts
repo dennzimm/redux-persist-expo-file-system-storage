@@ -23,9 +23,14 @@ class ExpoFileSystemStorage implements StorageEngine {
   >;
 
   /**
-   * A promise that resolves when the storage is ready.
+   * Indicates whether the storage has been initialized.
    */
-  private ready: Promise<void>;
+  private isInitialized: boolean = false;
+
+  /**
+   * A promise that represents the initialization process of the storage.
+   */
+  private initializationPromise: Promise<void> | null = null;
 
   /**
    * Constructs a new instance of the ExpoFileSystemStorage class.
@@ -44,7 +49,7 @@ class ExpoFileSystemStorage implements StorageEngine {
       },
     };
 
-    this.ready = this.initialize();
+    this.initializationPromise = this.initialize();
   }
 
   /**
@@ -81,7 +86,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: (content: string) => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<string> {
-    await this.ready;
+    await this.waitForInitialization();
 
     const { encoding } = this.options;
 
@@ -120,7 +125,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: (keys: string[]) => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<string[]> {
-    await this.ready;
+    await this.waitForInitialization();
 
     try {
       const fileNames = await FileSystem.readDirectoryAsync(
@@ -165,7 +170,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     const { encoding } = this.options;
 
@@ -206,7 +211,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     try {
       await FileSystem.deleteAsync(this.pathForKey(key), { idempotent: true });
@@ -240,7 +245,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     this.logDebugMessageInDebugMode(
       `(${this.clear.name}): Clearing storage...`
@@ -279,15 +284,15 @@ class ExpoFileSystemStorage implements StorageEngine {
    * @returns A promise that resolves to a boolean indicating whether there are stored items or not.
    */
   public async hasStoredItems(): Promise<boolean> {
-    await this.ready;
-    
+    await this.waitForInitialization();
+
     let hasStoredItems = false;
 
     try {
       const fileNames = await FileSystem.readDirectoryAsync(
         this.options.storagePath
       );
-      
+
       hasStoredItems = fileNames.length > 0;
     } catch (error) {
       this.handleStorageError(
@@ -305,9 +310,14 @@ class ExpoFileSystemStorage implements StorageEngine {
 
   /**
    * Initializes the storage by creating a new directory if it doesn't exist or using an existing directory.
+   *
    * @returns A promise that resolves when the initialization is complete.
    */
   private async initialize(): Promise<void> {
+    this.logDebugMessageInDebugMode(
+      `(${this.initialize.name}): Initializing storage...`
+    )
+    
     if (this.options.beforeInit) {
       await this.options.beforeInit();
     }
@@ -333,13 +343,39 @@ class ExpoFileSystemStorage implements StorageEngine {
         await this.options.afterInit();
       }
 
-      return Promise.resolve();
+      this.isInitialized = true;
+
+      this.logDebugMessageInDebugMode(
+        `(${this.initialize.name}): Storage initialized successfully!`
+      )
     } catch (error) {
       return this.handleStorageError(
         `(${this.initialize.name}): Error initializing storage`,
         error
       );
     }
+  }
+
+  /**
+   * Waits for the initialization of the storage.
+   * If the storage is already initialized, it returns immediately.
+   * If the storage is not yet initialized, it waits for the initialization to complete before returning.
+   *
+   * @returns A Promise that resolves when the storage is initialized.
+   * @throws An error if the initialization has failed.
+   */
+  private async waitForInitialization(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    if (!this.initializationPromise) {
+      throw new Error(
+        `(${this.waitForInitialization.name}): The initialization has failed (INITIALIZATION_PROMISE_NOT_FOUND)`
+      );
+    }
+
+    await this.initializationPromise;
   }
 
   /**

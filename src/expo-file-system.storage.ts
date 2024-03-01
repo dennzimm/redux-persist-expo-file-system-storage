@@ -13,7 +13,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    * The name of the ExpoFileSystemStorage class.
    */
   public static name = "ExpoFileSystemStorage";
-  
+
   /**
    * The options for the ExpoFileSystemStorage class.
    */
@@ -278,22 +278,29 @@ class ExpoFileSystemStorage implements StorageEngine {
    *
    * @returns A promise that resolves to a boolean indicating whether there are stored items or not.
    */
-  public hasStoredItems(): Promise<boolean> {
-    this.logDebugMessageInDebugMode(
-      `(${this.hasStoredItems.name}): Checking if there are stored items...`
-    );
+  public async hasStoredItems(): Promise<boolean> {
+    await this.ready;
+    
+    let hasStoredItems = false;
 
-    const hasStoredItems = FileSystem.readDirectoryAsync(
-      this.options.storagePath
-    )
-      .then((fileNames) => fileNames.length > 0)
-      .catch(() => false);
+    try {
+      const fileNames = await FileSystem.readDirectoryAsync(
+        this.options.storagePath
+      );
+      
+      hasStoredItems = fileNames.length > 0;
+    } catch (error) {
+      this.handleStorageError(
+        `(${this.hasStoredItems.name}): Error checking for stored items`,
+        error
+      );
+    } finally {
+      this.logDebugMessageInDebugMode(
+        `(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`
+      );
 
-    this.logDebugMessageInDebugMode(
-      `(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`
-    );
-
-    return hasStoredItems;
+      return hasStoredItems;
+    }
   }
 
   /**

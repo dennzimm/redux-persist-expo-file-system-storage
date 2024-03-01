@@ -1,5 +1,17 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.1.0
+
+### Minor Changes
+
+- 06c7a34: - Added colorized logger messages
+  - Improved handling for first-time read items in getItem
+  - Introduced itemExists and logStoredItems
+  - Added debug prefix to logDebugMessageInDebugMode
+  - Implemented waitForInitialization and removed ready promise
+  - Fixed async operation awaiting in hasStoredItems
+  - Updated readme with a link to the redux-persist issue
+
 ## 1.0.3
 
 ### Patch Changes

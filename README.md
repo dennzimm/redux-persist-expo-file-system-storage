@@ -15,7 +15,7 @@ A highly extensible and configurable storage engine for [Redux Persist](https://
 
 ## Why Choose redux-persist-expo-file-system-storage?
 
-This package serves as an alternative to the default AsyncStorage, specifically addressing storage size limitations in Android environments. It offers a versatile and efficient solution for managing and persisting state in your React Native applications.
+This package serves as an alternative to the default AsyncStorage, specifically addressing storage size limitations in Android environments ([#199](https://github.com/rt2zz/redux-persist/issues/199)). It offers a versatile and efficient solution for managing and persisting state in your React Native applications.
 
 ## Features
 

@@ -13,7 +13,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    * The name of the ExpoFileSystemStorage class.
    */
   public static name = "ExpoFileSystemStorage";
-  
+
   /**
    * The options for the ExpoFileSystemStorage class.
    */
@@ -23,9 +23,19 @@ class ExpoFileSystemStorage implements StorageEngine {
   >;
 
   /**
-   * A promise that resolves when the storage is ready.
+   * Set to keep track of already read keys during the current session.
    */
-  private ready: Promise<void>;
+  private readonly readKeys: Set<string> = new Set();
+
+  /**
+   * Indicates whether the storage has been initialized.
+   */
+  private isInitialized: boolean = false;
+
+  /**
+   * A promise that represents the initialization process of the storage.
+   */
+  private initializationPromise: Promise<void> | null = null;
 
   /**
    * Constructs a new instance of the ExpoFileSystemStorage class.
@@ -44,7 +54,7 @@ class ExpoFileSystemStorage implements StorageEngine {
       },
     };
 
-    this.ready = this.initialize();
+    this.initializationPromise = this.initialize();
   }
 
   /**
@@ -81,7 +91,11 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: (content: string) => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<string> {
-    await this.ready;
+    await this.waitForInitialization();
+
+    const isKeyReadForTheFirstTime = !this.readKeys.has(key);
+
+    this.readKeys.add(key);
 
     const { encoding } = this.options;
 
@@ -101,11 +115,21 @@ class ExpoFileSystemStorage implements StorageEngine {
 
       return content;
     } catch (error) {
-      return this.handleStorageError(
-        `(${this.getItem.name}): Error getting item for key '${key}'`,
-        error,
-        onFail
-      );
+      const isItemExistent = await this.itemExists(key);
+
+      if (isKeyReadForTheFirstTime && !isItemExistent) {
+        this.logDebugMessageInDebugMode(
+          `(${this.getItem.name}): Item for key '${key}' was read for the first time, but it doesn't exist in the storage. Maybe it was not set yet.`
+        );
+
+        return "";
+      }
+
+      const errorMessage = isKeyReadForTheFirstTime
+        ? `(${this.getItem.name}): Error getting item for key '${key}'. The item was read for the first time and exists in the storage, but an error occurred while reading it.`
+        : `(${this.getItem.name}): Error getting item for key '${key}'`;
+
+      return this.handleStorageError(errorMessage, error, onFail);
     }
   }
 
@@ -120,7 +144,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: (keys: string[]) => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<string[]> {
-    await this.ready;
+    await this.waitForInitialization();
 
     try {
       const fileNames = await FileSystem.readDirectoryAsync(
@@ -165,7 +189,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     const { encoding } = this.options;
 
@@ -206,7 +230,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     try {
       await FileSystem.deleteAsync(this.pathForKey(key), { idempotent: true });
@@ -240,11 +264,13 @@ class ExpoFileSystemStorage implements StorageEngine {
     onSuccess?: () => Promise<void> | void,
     onFail?: (error: Error) => Promise<void> | void
   ): Promise<void> {
-    await this.ready;
+    await this.waitForInitialization();
 
     this.logDebugMessageInDebugMode(
       `(${this.clear.name}): Clearing storage...`
     );
+
+    this.readKeys.clear();
 
     try {
       await FileSystem.deleteAsync(this.options.storagePath, {
@@ -274,33 +300,115 @@ class ExpoFileSystemStorage implements StorageEngine {
   }
 
   /**
+   * Checks if an item with the specified key exists in the storage.
+   *
+   * @param key - The key of the item to check.
+   * @returns A promise that resolves to a boolean indicating whether the item exists or not.
+   */
+  public async itemExists(key: string): Promise<boolean> {
+    await this.waitForInitialization();
+
+    try {
+      const { exists } = await FileSystem.getInfoAsync(this.pathForKey(key));
+
+      return exists;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Checks if there are any stored items in the storage directory.
    *
    * @returns A promise that resolves to a boolean indicating whether there are stored items or not.
    */
-  public hasStoredItems(): Promise<boolean> {
+  public async hasStoredItems(): Promise<boolean> {
+    await this.waitForInitialization();
+
+    let hasStoredItems = false;
+
+    try {
+      const fileNames = await FileSystem.readDirectoryAsync(
+        this.options.storagePath
+      );
+
+      hasStoredItems = fileNames.length > 0;
+    } catch (error) {
+      this.handleStorageError(
+        `(${this.hasStoredItems.name}): Error checking for stored items`,
+        error
+      );
+    } finally {
+      this.logDebugMessageInDebugMode(
+        `(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`
+      );
+
+      return hasStoredItems;
+    }
+  }
+
+  /**
+   * Logs all the stored items.
+   *
+   * @returns A promise that resolves when the logging is complete.
+   */
+  public async logStoredItems(): Promise<void> {
+    await this.waitForInitialization();
+
     this.logDebugMessageInDebugMode(
-      `(${this.hasStoredItems.name}): Checking if there are stored items...`
+      `(${this.logStoredItems.name}): Logging stored items...`
     );
 
-    const hasStoredItems = FileSystem.readDirectoryAsync(
-      this.options.storagePath
-    )
-      .then((fileNames) => fileNames.length > 0)
-      .catch(() => false);
+    if (!(await this.hasStoredItems())) {
+      this.logDebugMessage(
+        `(${this.logStoredItems.name}): No stored items found`
+      );
 
-    this.logDebugMessageInDebugMode(
-      `(${this.hasStoredItems.name}): Has stored items: '${hasStoredItems}'`
+      return;
+    }
+
+    const keys = await this.getAllKeys();
+
+    await Promise.all(
+      keys.map(async (key) => {
+        const { encoding } = this.options;
+
+        try {
+          const content = await FileSystem.readAsStringAsync(
+            this.pathForKey(key),
+            {
+              encoding,
+            }
+          );
+
+          this.logDebugMessage(
+            `(${this.logStoredItems.name}): Key: '${key}', Content:`,
+            deepParseJson(content)
+          );
+        } catch (error) {
+          return this.handleStorageError(
+            `(${this.logStoredItems.name}): Error logging stored items`,
+            error
+          );
+        }
+      })
     );
 
-    return hasStoredItems;
+    this.logDebugMessageInDebugMode(
+      `(${this.logStoredItems.name}): Stored items logged successfully!`
+    );
   }
 
   /**
    * Initializes the storage by creating a new directory if it doesn't exist or using an existing directory.
+   *
    * @returns A promise that resolves when the initialization is complete.
    */
   private async initialize(): Promise<void> {
+    this.logDebugMessageInDebugMode(
+      `(${this.initialize.name}): Initializing storage...`
+    );
+
     if (this.options.beforeInit) {
       await this.options.beforeInit();
     }
@@ -326,13 +434,39 @@ class ExpoFileSystemStorage implements StorageEngine {
         await this.options.afterInit();
       }
 
-      return Promise.resolve();
+      this.isInitialized = true;
+
+      this.logDebugMessageInDebugMode(
+        `(${this.initialize.name}): Storage initialized successfully!`
+      );
     } catch (error) {
       return this.handleStorageError(
         `(${this.initialize.name}): Error initializing storage`,
         error
       );
     }
+  }
+
+  /**
+   * Waits for the initialization of the storage.
+   * If the storage is already initialized, it returns immediately.
+   * If the storage is not yet initialized, it waits for the initialization to complete before returning.
+   *
+   * @returns A Promise that resolves when the storage is initialized.
+   * @throws An error if the initialization has failed.
+   */
+  private async waitForInitialization(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
+    if (!this.initializationPromise) {
+      throw new Error(
+        `(${this.waitForInitialization.name}): The initialization has failed (INITIALIZATION_PROMISE_NOT_FOUND)`
+      );
+    }
+
+    await this.initializationPromise;
   }
 
   /**
@@ -356,8 +490,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    */
   private logDebugMessage(message: string, ...optionalParams: unknown[]): void {
     this.logger.debug(
-      `${ExpoFileSystemStorage.name}:`,
-      message,
+      `\u001b[36m${ExpoFileSystemStorage.name}: ${message}\u001b[0m`,
       ...optionalParams
     );
   }
@@ -373,7 +506,7 @@ class ExpoFileSystemStorage implements StorageEngine {
     ...optionalParams: unknown[]
   ): void {
     if (this.isDebugModeEnabled) {
-      this.logDebugMessage(message, ...optionalParams);
+      this.logDebugMessage(`[DEBUG] ${message}`, ...optionalParams);
     }
   }
 
@@ -385,8 +518,7 @@ class ExpoFileSystemStorage implements StorageEngine {
    */
   private logErrorMessage(message: string, ...optionalParams: unknown[]): void {
     this.logger.error(
-      `${ExpoFileSystemStorage.name}:`,
-      message,
+      `\u001b[31m${ExpoFileSystemStorage.name}: ${message}\u001b[0m`,
       ...optionalParams
     );
   }

@@ -10,7 +10,7 @@ devDependencies:
     version: 2.27.1
   expo-file-system:
     specifier: ^16.0.6
-    version: 16.0.6(expo@50.0.7)
+    version: 16.0.7(expo@50.0.7)
   tsup:
     specifier: ^8.0.2
     version: 8.0.2(typescript@5.3.3)
@@ -3826,7 +3826,7 @@ packages:
       '@react-native/assets-registry': 0.73.1
       blueimp-md5: 2.19.0
       expo-constants: 15.4.5(expo@50.0.7)
-      expo-file-system: 16.0.6(expo@50.0.7)
+      expo-file-system: 16.0.7(expo@50.0.7)
       invariant: 2.2.4
       md5-file: 3.2.3
     transitivePeerDependencies:
@@ -3845,8 +3845,8 @@ packages:
       - supports-color
     dev: true
 
-  /expo-file-system@16.0.6(expo@50.0.7):
-    resolution: {integrity: sha512-ATCHL7nEg2WwKeamW/SDTR9jBEqM5wncFq594ftKS5QFmhKIrX48d9jyPFGnNq+6h8AGPg4QKh2KCA4OY49L4g==}
+  /expo-file-system@16.0.7(expo@50.0.7):
+    resolution: {integrity: sha512-BELr1Agj6WK0PKVMcD0rqC3fP5unKfp2KW8/sNhtTHgdzQ/F0Pylq9pTk9u7KEu0ZbEdTpk5EMarLMPwffi3og==}
     peerDependencies:
       expo: '*'
     dependencies:
@@ -3902,7 +3902,7 @@ packages:
       '@expo/vector-icons': 14.0.0
       babel-preset-expo: 10.0.1(@babel/core@7.23.9)
       expo-asset: 9.0.2(expo@50.0.7)
-      expo-file-system: 16.0.6(expo@50.0.7)
+      expo-file-system: 16.0.7(expo@50.0.7)
       expo-font: 11.10.3(expo@50.0.7)
       expo-keep-awake: 12.8.2(expo@50.0.7)
       expo-modules-autolinking: 1.10.3

@@ -1,5 +1,12 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.1.3
+
+### Patch Changes
+
+- 763ea0a: chore(deps-dev): bump type-fest from 4.14.0 to 4.15.0
+- c1d49b3: chore(deps-dev): bump typescript from 5.4.3 to 5.4.5
+
 ## 1.1.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.1.4
+
+### Patch Changes
+
+- 8cc9081: chore(deps-dev): bump type-fest from 4.15.0 to 4.18.0
+- 0847ad0: chore(deps-dev): bump expo-file-system from 16.0.8 to 16.0.9
+
 ## 1.1.3
 
 ### Patch Changes

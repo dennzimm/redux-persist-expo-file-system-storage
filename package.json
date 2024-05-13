@@ -13,13 +13,13 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "expo-file-system": "^16.0.6",
+    "expo-file-system": "^17.0.1",
     "tsup": "^8.0.2",
     "type-fest": "^4.10.3",
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "expo-file-system": "^16.0.6"
+    "expo-file-system": "^17.0.1"
   },
   "files": [
     "dist/*.js",

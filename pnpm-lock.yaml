@@ -9,8 +9,8 @@ devDependencies:
     specifier: ^2.27.1
     version: 2.27.1
   expo-file-system:
-    specifier: ^16.0.6
-    version: 16.0.9(expo@50.0.7)
+    specifier: ^17.0.1
+    version: 17.0.1(expo@50.0.7)
   tsup:
     specifier: ^8.0.2
     version: 8.0.2(typescript@5.4.5)
@@ -3847,6 +3847,14 @@ packages:
 
   /expo-file-system@16.0.9(expo@50.0.7):
     resolution: {integrity: sha512-3gRPvKVv7/Y7AdD9eHMIdfg5YbUn2zbwKofjsloTI5sEC57SLUFJtbLvUCz9Pk63DaSQ7WIE1JM0EASyvuPbuw==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 50.0.7(@babel/core@7.23.9)(@react-native/babel-preset@0.73.21)
+    dev: true
+
+  /expo-file-system@17.0.1(expo@50.0.7):
+    resolution: {integrity: sha512-dYpnZJqTGj6HCYJyXAgpFkQWsiCH3HY1ek2cFZVHFoEc5tLz9gmdEgTF6nFHurvmvfmXqxi7a5CXyVm0aFYJBw==}
     peerDependencies:
       expo: '*'
     dependencies:

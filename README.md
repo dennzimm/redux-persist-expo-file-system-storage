@@ -1,6 +1,8 @@
 # redux-persist-expo-file-system-storage
 
-A highly extensible and configurable storage engine for [Redux Persist](https://github.com/rt2zz/redux-persist) using [Expo FileSystem](https://docs.expo.dev/versions/latest/sdk/filesystem/) for persistence in React Native applications. 
+A highly extensible and configurable storage engine for [Redux Persist](https://github.com/rt2zz/redux-persist) using [Expo FileSystem](https://docs.expo.dev/versions/latest/sdk/filesystem/) for persistence in React Native applications.
+
+Check out my article for a quick overview and insights about this package [here](https://dev.to/dennzimm/when-redux-persist-meets-expo-filesystem-4km)!
 
 ## Table of Contents
 
@@ -48,29 +50,32 @@ Here's a simple example demonstrating how to integrate `redux-persist-expo-file-
 
 ```typescript
 import * as FileSystem from "expo-file-system";
-import { createExpoFileSystemStorage, type StorageOptions } from 'redux-persist-expo-file-system-storage';
+import {
+  createExpoFileSystemStorage,
+  type StorageOptions,
+} from "redux-persist-expo-file-system-storage";
 import type { PersistConfig } from "redux-persist";
-import { rootReducer, type RootState } from './store.config';
+import { rootReducer, type RootState } from "./store.config";
 
 // Either without custom options (Default values can be found in the Options section)
 export const expoFileSystemStorage = createExpoFileSystemStorage();
 
 // or with custom options
 export const expoFileSystemStorage = createExpoFileSystemStorage({
-    storagePath: `${FileSystem.documentDirectory}customPersistStorageData/`,
-    encoding: FileSystem.EncodingType.BASE64,
-    debug: true,
-    logger: {
-        debug: customDebugFunction,
-        error: customErrorFunction,
-    },
-    beforeInit: customBeforeInitFunction,
-    afterInit: customAfterInitFunction,
-}),
+  storagePath: `${FileSystem.documentDirectory}customPersistStorageData/`,
+  encoding: FileSystem.EncodingType.BASE64,
+  debug: true,
+  logger: {
+    debug: customDebugFunction,
+    error: customErrorFunction,
+  },
+  beforeInit: customBeforeInitFunction,
+  afterInit: customAfterInitFunction,
+});
 
 // Configuration for Redux Persist
 const persistConfig: PersistConfig<RootState> = {
-  key: 'root',
+  key: "root",
   // Use the ExpoFileSystemStorage as the storage engine
   storage: expoFileSystemStorage,
   // ... Add other persist config options if needed
@@ -79,8 +84,8 @@ const persistConfig: PersistConfig<RootState> = {
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
-    reducer: persistedReducer,
-    // ... Add other config options if needed
+  reducer: persistedReducer,
+  // ... Add other config options if needed
 });
 ```
 
@@ -88,21 +93,21 @@ export const store = configureStore({
 
 The storage engine provides various options for customization. Fine-tune your storage engine with the following configuration options:
 
-| Option         | Type                                | Default Value                                          | Description                                                                                                                                                                                                  | 
-| -------------- | ----------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | 
-| `storagePath`  | `string`                            | `FileSystem.documentDirectory + 'persistStorageData/'` | The directory path for storing persisted data. It is recommended to provide a custom path for better organization and to avoid potential conflicts with other files in the default |directory.               |
-| `encoding`     | `FileSystem.EncodingType`           | `FileSystem.EncodingType.UTF8`                         | The encoding type for reading and writing files. Use `FileSystem.EncodingType.BASE64` for binary data or if your application deals with non-text data.                                                       |
-| `debug`        | `boolean`                           | `false`                                                | Enable/disable debug mode. When enabled, detailed logs will be printed during development, aiding in debugging and understanding the library's actions.                                                      |
-| `logger`       | `{ debug: Logger, error: Logger }`  | `{ debug: console.log, error: console.error }`         | Custom logger object with `debug` and `error` methods. You can provide your own logger functions to tailor the logging behavior according to your application's needs.                                       |
-| `beforeInit`   | `() => Promise<void> \| void`       | `undefined`                                            | Callback function to be executed before initializing the storage. Use this for performing custom actions or setup before the storage engine is ready.                                                        |
-| `afterInit`    | `() => Promise<void> \| void`       | `undefined`                                            | Callback function to be executed after initializing the storage. Use this for performing custom actions or setup after the storage engine is ready.                                                          |
+| Option        | Type                               | Default Value                                          | Description                                                                                                                                                                        |
+| ------------- | ---------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `storagePath` | `string`                           | `FileSystem.documentDirectory + 'persistStorageData/'` | The directory path for storing persisted data. It is recommended to provide a custom path for better organization and to avoid potential conflicts with other files in the default | directory. |
+| `encoding`    | `FileSystem.EncodingType`          | `FileSystem.EncodingType.UTF8`                         | The encoding type for reading and writing files. Use `FileSystem.EncodingType.BASE64` for binary data or if your application deals with non-text data.                             |
+| `debug`       | `boolean`                          | `false`                                                | Enable/disable debug mode. When enabled, detailed logs will be printed during development, aiding in debugging and understanding the library's actions.                            |
+| `logger`      | `{ debug: Logger, error: Logger }` | `{ debug: console.log, error: console.error }`         | Custom logger object with `debug` and `error` methods. You can provide your own logger functions to tailor the logging behavior according to your application's needs.             |
+| `beforeInit`  | `() => Promise<void> \| void`      | `undefined`                                            | Callback function to be executed before initializing the storage. Use this for performing custom actions or setup before the storage engine is ready.                              |
+| `afterInit`   | `() => Promise<void> \| void`      | `undefined`                                            | Callback function to be executed after initializing the storage. Use this for performing custom actions or setup after the storage engine is ready.                                |
 
 ## API
 
 This example demonstrates the direct usage of `getItem` and `setItem` methods from `ExpoFileSystemStorage`. For more details and available methods, please refer to the `ExpoFileSystemStorage` class.
 
 ```typescript
-import { createExpoFileSystemStorage } from 'redux-persist-expo-file-system-storage';
+import { createExpoFileSystemStorage } from "redux-persist-expo-file-system-storage";
 
 // Create an instance of ExpoFileSystemStorage
 const expoFileSystemStorage = createExpoFileSystemStorage();
@@ -110,23 +115,23 @@ const expoFileSystemStorage = createExpoFileSystemStorage();
 // Example usage of getItem
 async function exampleGetItem() {
   try {
-    const key = 'exampleKey';
+    const key = "exampleKey";
     const value = await expoFileSystemStorage.getItem(key);
     console.log(`Item with key '${key}' has value:`, value);
   } catch (error) {
-    console.error('Error getting item:', error);
+    console.error("Error getting item:", error);
   }
 }
 
 // Example usage of setItem
 async function exampleSetItem() {
   try {
-    const key = 'exampleKey';
-    const value = 'exampleValue';
+    const key = "exampleKey";
+    const value = "exampleValue";
     await expoFileSystemStorage.setItem(key, value);
     console.log(`Item with key '${key}' set successfully!`);
   } catch (error) {
-    console.error('Error setting item:', error);
+    console.error("Error setting item:", error);
   }
 }
 

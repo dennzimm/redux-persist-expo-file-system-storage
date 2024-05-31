@@ -1,5 +1,11 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.1.6
+
+### Patch Changes
+
+- cead2ce: chore(deps-dev): bump expo-file-system from 16.0.9 to 17.0.1
+
 ## 1.1.5
 
 ### Patch Changes

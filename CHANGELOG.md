@@ -1,5 +1,13 @@
 # redux-persist-expo-filesystem-storage
 
+## 1.1.5
+
+### Patch Changes
+
+- ba3fe8e: chore(deps): bump pnpm/action-setup from 3 to 4
+- c49edff: chore(deps-dev): bump @changesets/cli from 2.27.1 to 2.27.3
+- 22f1954: chore(deps-dev): bump type-fest from 4.18.0 to 4.18.3
+
 ## 1.1.4
 
 ### Patch Changes
